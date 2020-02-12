@@ -58,12 +58,12 @@
 bool open = false;
 string gpuString;
 float offset_x, offset_y, hudSpacing;
-int hudFirstRow, hudSecondRow, frameOverhead = 0, sleepTime = 0;
+int hudFirstRow, hudSecondRow;
 string engineName, engineVersion;
 ImFont* font = nullptr;
 ImFont* font1 = nullptr;
 struct amdGpu amdgpu;
-double frameStart, frameEnd, targetFrameTime = 0;
+int64_t targetFrameTime = 0, sleepOverhead = 0, sleepTime = 0, frameStart = 0, frameEnd = 0;
 
 #define RGBGetBValue(rgb)   (rgb & 0x000000FF)
 #define RGBGetGValue(rgb)   ((rgb >> 8) & 0x000000FF)
@@ -2152,10 +2152,14 @@ static void overlay_DestroySwapchainKHR(
 }
 
 void FpsLimiter(){
-   int64_t now = os_time_get_nano();
-   sleepTime = targetFrameTime - (now - frameEnd);
-   this_thread::sleep_for(chrono::nanoseconds(sleepTime - frameOverhead));
-   frameOverhead = (now - frameStart);
+   sleepTime = targetFrameTime - (frameStart - frameEnd);
+   if (sleepTime > 0) {
+      int64_t adj = sleepTime - sleepOverhead;
+      this_thread::sleep_for(chrono::nanoseconds(adj));
+      sleepOverhead = (os_time_get_nano() - frameStart) - adj;
+      if (sleepOverhead > targetFrameTime)
+         sleepOverhead = 0;
+   }
 }
 
 static VkResult overlay_QueuePresentKHR(
@@ -2581,7 +2585,7 @@ static VkResult overlay_CreateInstance(
 
    parse_overlay_env(&instance_data->params, getenv("MANGOHUD_CONFIG"));
    if (instance_data->params.fps_limit > 0)
-      targetFrameTime = double(1000000000.0f / instance_data->params.fps_limit);
+      targetFrameTime = int64_t(1000000000.0 / instance_data->params.fps_limit);
 
    int font_size;
    instance_data->params.font_size > 0 ? font_size = instance_data->params.font_size : font_size = 24;
