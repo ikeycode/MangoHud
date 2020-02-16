@@ -1204,18 +1204,21 @@ static void compute_swapchain_display(struct swapchain_data *data)
          ImGui::Text("GB");
          ImGui::PopFont();
       }
-      if (instance_data->params.enabled[OVERLAY_PARAM_ENABLED_io]){
+      if (instance_data->params.enabled[OVERLAY_PARAM_ENABLED_io_read]){
          auto sampling = instance_data->params.fps_sampling_period;
          ImGui::TextColored(ImVec4(0.760, 0.576, 0.4, 1.00f), "IO rd");
          ImGui::SameLine(hudFirstRow);
-         ImGui::Text("%.2f", (data->io.diff.read_bytes / (1024.f * 1024.f)) * (1000000 / sampling));
+         ImGui::Text("%.2f", data->io.diff.read * (1000000 / sampling));
          ImGui::SameLine(0,1.0f);
          ImGui::PushFont(font1);
          ImGui::Text("MiB/s");
          ImGui::PopFont();
+      }
+      if (instance_data->params.enabled[OVERLAY_PARAM_ENABLED_io_write]){
+         auto sampling = instance_data->params.fps_sampling_period;
          ImGui::TextColored(ImVec4(0.760, 0.576, 0.4, 1.00f), "IO wr");
          ImGui::SameLine(hudFirstRow);
-         ImGui::Text("%.2f", (data->io.diff.write_bytes / (1024.f * 1024.f)) * (1000000 / sampling));
+         ImGui::Text("%.2f", data->io.diff.write * (1000000 / sampling));
          ImGui::SameLine(0,1.0f);
          ImGui::PushFont(font1);
          ImGui::Text("MiB/s");

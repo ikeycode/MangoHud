@@ -19,8 +19,8 @@ void *getIoStats(void *args) {
                 try_stoull(io->curr.write_bytes, line.substr(13));
             }
         }
-        io->diff.read_bytes  = io->curr.read_bytes  - io->prev.read_bytes;
-        io->diff.write_bytes = io->curr.write_bytes - io->prev.write_bytes;
+        io->diff.read  = (io->curr.read_bytes  - io->prev.read_bytes) / (1024.f * 1024.f);
+        io->diff.write = (io->curr.write_bytes - io->prev.write_bytes) / (1024.f * 1024.f);
     }
     pthread_detach(ioThread);
     return NULL;

@@ -14,8 +14,8 @@ struct iostats {
       unsigned long long write_bytes;
     } prev;
     struct {
-      unsigned long long read_bytes;
-      unsigned long long write_bytes;
+      float read;
+      float write;
     } diff;
 };
 

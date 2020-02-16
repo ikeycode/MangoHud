@@ -48,7 +48,8 @@ extern "C" {
    OVERLAY_PARAM_BOOL(vram)                          \
    OVERLAY_PARAM_BOOL(crosshair)                     \
    OVERLAY_PARAM_BOOL(time)                          \
-   OVERLAY_PARAM_BOOL(io)                            \
+   OVERLAY_PARAM_BOOL(io_read)                       \
+   OVERLAY_PARAM_BOOL(io_write)                      \
    OVERLAY_PARAM_BOOL(full)                          \
    OVERLAY_PARAM_CUSTOM(fps_sampling_period)         \
    OVERLAY_PARAM_CUSTOM(output_file)                 \
