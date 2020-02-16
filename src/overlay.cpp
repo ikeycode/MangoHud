@@ -53,6 +53,7 @@
 #include "logging.h"
 #include "keybinds.h"
 #include "cpu.h"
+#include "iostats.h"
 #include "loaders/loader_nvml.h"
 
 bool open = false;
@@ -224,6 +225,8 @@ struct swapchain_data {
 
    /* Over fps_sampling_period */
    struct frame_stat accumulated_stats;
+
+   struct iostats io;
 };
 
 static const VkQueryPipelineStatisticFlags overlay_query_flags =
@@ -1000,6 +1003,7 @@ static void snapshot_swapchain_frame(struct swapchain_data *data)
 
             // get ram usage/max
             pthread_create(&memoryThread, NULL, &update_meminfo, NULL);
+            pthread_create(&ioThread, NULL, &getIoStats, &data->io);
 
             // update variables for logging
             // cpuLoadLog = cpuArray[0].value;
@@ -1198,6 +1202,23 @@ static void compute_swapchain_display(struct swapchain_data *data)
          ImGui::SameLine(0,1.0f);
          ImGui::PushFont(font1);
          ImGui::Text("GB");
+         ImGui::PopFont();
+      }
+      if (instance_data->params.enabled[OVERLAY_PARAM_ENABLED_io]){
+         auto sampling = instance_data->params.fps_sampling_period;
+         ImGui::TextColored(ImVec4(0.760, 0.576, 0.4, 1.00f), "IO rd");
+         ImGui::SameLine(hudFirstRow);
+         ImGui::Text("%.2f", (data->io.diff.read_bytes / (1024.f * 1024.f)) * (1000000 / sampling));
+         ImGui::SameLine(0,1.0f);
+         ImGui::PushFont(font1);
+         ImGui::Text("MiB/s");
+         ImGui::PopFont();
+         ImGui::TextColored(ImVec4(0.760, 0.576, 0.4, 1.00f), "IO wr");
+         ImGui::SameLine(hudFirstRow);
+         ImGui::Text("%.2f", (data->io.diff.write_bytes / (1024.f * 1024.f)) * (1000000 / sampling));
+         ImGui::SameLine(0,1.0f);
+         ImGui::PushFont(font1);
+         ImGui::Text("MiB/s");
          ImGui::PopFont();
       }
       if (instance_data->params.enabled[OVERLAY_PARAM_ENABLED_fps]){
